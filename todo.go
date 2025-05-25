@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"time"
+
+	"github.com/aquasecurity/table"
 )
 
 type Todo struct {
@@ -53,4 +57,38 @@ func (todos *Todos) Toogle(index int) error {
 	return nil
 }
 
+
+
+func (todos *Todos) edit(index int, title string) error {
+	t := *todos
+
+	if index < 0 || index >= len(t) {
+		return fmt.Errorf("index out of range")
+	}
+
+	t[index].Title = title
+	return nil
+}
+
+func (todos *Todos) Print(){
+	table := table.New(os.Stdout)
+	table.SetRowLines(false)
+	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At")
+	for i, todo := range *todos {
+		complated := "❌"
+		complatedAt := "N/A"
+
+		if todo.Completed {
+			complated = "✅"
+			if todo.CompletedAt != nil {
+				complatedAt = todo.CompletedAt.Format(time.RFC3339)
+			}
+		}
+
+		table.AddRow(strconv.Itoa(i+1), todo.Title, complated, todo.CreatedAt.Format(time.RFC3339), complatedAt)
+
+}
+
+	table.Render()
+}
 
